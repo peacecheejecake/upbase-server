@@ -1,0 +1,22 @@
+{
+  "name": "js-simplest-trade",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "axios": "^1.7.9",
+    "dotenv": "^16.4.7",
+    "jsonwebtoken": "^9.0.2",
+    "specifier-resolution-node": "^1.1.4",
+    "uuid": "^11.0.3",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "prettier": "^3.4.2"
+  },
+  "scripts": {
+    "start": "node --import=specifier-resolution-node/register src/index.js",
+    "format": "prettier --write ."
+  }
+}
