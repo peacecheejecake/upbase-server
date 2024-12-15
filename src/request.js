@@ -5,11 +5,11 @@ import crypto from 'crypto';
 import querystring from 'querystring';
 
 import env from './env';
+import { filterEmptyValues } from './utils';
+import logger from './utils/logger';
 
 const jwtToken = (body = {}) => {
-  const _body = Object.entries(body)
-    .filter(([key, value]) => value !== undefined)
-    .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
+  const _body = filterEmptyValues(body);
   const query = querystring.encode(_body);
   const queryHash = crypto
     .createHash('sha512')
@@ -28,13 +28,33 @@ const jwtToken = (body = {}) => {
 
 const _axios = axios.create({
   baseURL: env.BASE_URL,
-  // headers: { Authorization: `Bearer ${jwtToken()}` },
+  timeout: 30000,
 });
 
 _axios.interceptors.request.use((config) => {
-  config.headers.Authorization = `Bearer ${jwtToken(config.params)}`;
+  config.params = filterEmptyValues(config.params ?? {});
+  config.headers.Authorization = `Bearer ${jwtToken(config.params ?? {})}`;
+  logger.debug(
+    `[API - request] ${config.method} ${config.url} ${JSON.stringify(config.params)}`
+  );
   return config;
 });
+
+_axios.interceptors.response.use(
+  (response) => {
+    logger.debug(
+      `[API - response Success] ${response.config.method} ${response.config.url}`
+    );
+    return response;
+  },
+  (error) => {
+    logger.error(
+      '[API - response Error] ' + JSON.stringify(error.response.data)
+    );
+    // return Promise.reject(error);
+    return error;
+  }
+);
 
 // const request = {
 //   get: (url, config = {}) => {
