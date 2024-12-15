@@ -14,7 +14,7 @@ export const getOrdersByIds = ({ uuids, identifiers }) => {
   return request.get('/v1/orders/uuids', {
     params: {
       uuids: uuids?.slice(0, 100),
-      identifiers: identifiers?.slice(0, 100),
+      // identifiers: identifiers?.slice(0, 100),
     },
   });
 };

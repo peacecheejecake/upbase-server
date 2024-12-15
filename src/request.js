@@ -5,15 +5,17 @@ import crypto from 'crypto';
 import querystring from 'querystring';
 
 import env from './env';
-import { filterEmptyValues } from './utils';
+import { filterEmptyValues, flatternArrayValues } from './utils';
 import logger from './utils/logger';
 
-const jwtToken = (body = {}) => {
-  const _body = filterEmptyValues(body);
-  const query = querystring.encode(_body);
+const jwtToken = (body = {}, { encode = true } = {}) => {
+  const _body = body;
+  const query = encode
+    ? querystring.encode(_body)
+    : new URLSearchParams(_body).toString();
   const queryHash = crypto
     .createHash('sha512')
-    .update(query, 'utf-8')
+    .update(query, 'utf-8') // todo: encode or not(array)
     .digest('hex');
 
   const payload = {
@@ -32,7 +34,7 @@ const _axios = axios.create({
 });
 
 _axios.interceptors.request.use((config) => {
-  config.params = filterEmptyValues(config.params ?? {});
+  config.params = flatternArrayValues(filterEmptyValues(config.params ?? {}));
   config.headers.Authorization = `Bearer ${jwtToken(config.params ?? {})}`;
   logger.debug(
     `[API - request] ${config.method} ${config.url} ${JSON.stringify(config.params)}`
@@ -49,7 +51,7 @@ _axios.interceptors.response.use(
   },
   (error) => {
     logger.error(
-      '[API - response Error] ' + JSON.stringify(error.response.data)
+      `[API - response Error] ${error.config.method} ${error.config.url} ${JSON.stringify(error.response.data)}`
     );
     // return Promise.reject(error);
     return error;

@@ -3,6 +3,7 @@ import { getCandles, postOrder, getOrdersByIds } from '../api';
 import { addOrder } from '../db/order';
 import logger from '../utils/logger';
 import { COMMISION_RATE } from './constants';
+// import { modifyOrderHoldingState } from '../db/order.js';
 // import { average } from '../utils';
 
 class Buyer {
@@ -112,24 +113,39 @@ class Buyer {
       // volume: _volume,
     });
   }
-  async addOrderToDatabase(data) {
-    const { side, ...order } = data;
-    await addOrder({
-      ...order,
-      holding: false,
-    });
-    this.checkOrderUntilClosed({ uuid: data.uuid });
+  async addOrderToDatabase({ uuid }) {
+    // const { side, ...order } = data;
+
+    // const { remaining_volume, executed_volume } = order;
+    // console.log(order);
+    // const volume = Number(remaining_volume) + Number(executed_volume);
+
+    // await addOrder({
+    //   ...order,
+    //   volume,
+    //   holding: false,
+    // });
+
+    //todo
+    this.checkOrderUntilClosed({ uuid });
+
+    // setTimeout(() => {
+    //   modifyOrderHoldingState({ uuid: data.uuid, holding: true });
+    // }, 1000);
   }
   checkOrderUntilClosed({ uuid }) {
     logger.debug(`[Buyer] checkOrderUntilClosed START: ${uuid}`);
     const timer = setInterval(async () => {
-      const response = await getOrdersByIds({ uuid });
+      const response = await getOrdersByIds({ uuids: [uuid] });
 
-      const isDone = (response?.data ?? []).includes(
-        ({ uuid: _uuid, state }) => _uuid === uuid && state === 'done'
+      const order = (response?.data ?? []).find(
+        ({ uuid: _uuid, state }) => _uuid === uuid
       );
-      if (isDone) {
+
+      if (order?.state === 'done') {
         clearInterval(timer);
+        // modifyOrderHoldingState({ uuid, holdiang: true });
+        addOrder({ ...order, holding: true });
         logger.info(`[Buyer] checkOrderUntilClosed CLOSED: ${uuid}`);
       }
     }, 1000);

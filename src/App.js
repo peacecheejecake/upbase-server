@@ -1,6 +1,7 @@
 import logger from './utils/logger';
 import Trader from './trader';
-import { getClosedOrders, getOpenOrders } from './api';
+import { getClosedOrders, getOpenOrders, getOrdersByIds } from './api';
+import { addOrder } from './db/order.js';
 
 class App {
   #trader;
@@ -12,6 +13,7 @@ class App {
       intervalBuy,
       intervalSell,
     });
+
     // getClosedOrders({ orderBy: 'asc' }).then((response) => {
     //   console.log('getOrders', response.data);
     // });

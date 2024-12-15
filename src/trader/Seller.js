@@ -60,7 +60,7 @@ class Seller {
     if (!isOut) {
       logger.debug(`[Seller] CANCEL:`, {
         // rates: JSON.stringify(rates),
-        // holdingOrders: holdingOrders.price,
+        // holdingOrders: holdingOrders.length,
         // sellingList: sellingList.length,
         rate,
         sellingPrice,
@@ -70,30 +70,30 @@ class Seller {
 
     // const volume = sum(sellingList.map(({ volume }) => Number(volume)));
     const volume = balance;
-    const response = await this.sell({
+    const data = await this.sell({
       price: sellingPrice,
       volume,
     });
-    const { uuid } = response?.data ?? {};
+    const { uuid } = data ?? {};
 
     if (uuid) {
       logger.info(`SELL[${this.market}]: ${sellingPrice}, ${volume}`);
-      sellingList.forEach(async ({ uuid }) => {
-        try {
-          const { rowCount } = await modifyOrderHoldingState({
-            uuid,
-            holding: false,
-          });
+      // sellingList.forEach(async ({ uuid }) => {
+      //   try {
+      //     const { rowCount } = await modifyOrderHoldingState({
+      //       uuid,
+      //       holding: false,
+      //     });
 
-          if (rowCount !== sellingList.length) {
-            logger.warn(
-              `Try to sell ${sellingList.length}, but ${rowCount} done`
-            );
-          }
-        } catch (e) {
-          logger.error('Error on modifyOrderHoldingState: ', e);
-        }
-      });
+      //     if (rowCount !== sellingList.length) {
+      //       logger.warn(
+      //         `Try to sell ${sellingList.length}, but ${rowCount} done`
+      //       );
+      //     }
+      //   } catch (e) {
+      //     logger.error('Error on modifyOrderHoldingState: ', e);
+      //   }
+      // });
 
       //todo: check until closed
       // this.checkUntilClosed({uuid});
@@ -101,10 +101,11 @@ class Seller {
   }
   async consider() {
     const currentPrice = await this.#loader.currentPrice?.();
-    // const holdingOrders = await this.getHoldingOrders();
+    const holdingOrders = await this.getHoldingOrders();
     const coinAccount = await this.getCoinAccount();
 
     if (!currentPrice || !coinAccount) return;
+    // if (!currentPrice || !holdingOrders) return;
 
     // const rates = holdingOrders.map(({ price }) => {
     //   const _price = Number(price);
@@ -117,8 +118,8 @@ class Seller {
     // );
 
     return {
-      // holdingOrders,
-      // rates: [rate],
+      holdingOrders,
+      // rates,
       // sellingList,
       isOut: rate <= this.thresholdLose || rate >= this.thresholdWin,
       rate,
@@ -140,9 +141,8 @@ class Seller {
 
     logger.log('SELL ALL: ', response?.data);
   }
-  async sell({ price, volume }) {
-    const response = this._makeOrder({ volume });
-    return response;
+  sell({ price, volume }) {
+    return this._makeOrder({ volume });
   }
   async checkUntilClosed({ uuid }) {
     //todo: check until closed
@@ -177,7 +177,7 @@ class Seller {
       // price,
       volume,
     });
-    return response;
+    return response?.data ?? null;
   }
 }
 
