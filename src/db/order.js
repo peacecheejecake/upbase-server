@@ -1,4 +1,5 @@
 import client from './client';
+import logger from '../utils/logger.js';
 
 export const getOrders = (query = {}) => {
   // const select = 'SELECT * FROM orders_buy';
@@ -28,6 +29,7 @@ export const getOrders = (query = {}) => {
 };
 
 export const deleteOrder = ({ uuid }) => {
+  logger.debug(`[DB - deleteOrder] uuid: ${uuid}`);
   return client.query('DELETE FROM orders_buy WHERE uuid = $1', [uuid]);
 };
 

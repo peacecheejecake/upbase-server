@@ -111,7 +111,7 @@ export const postOrder = ({
   side,
   volume,
   price,
-  ordType = 'limit',
+  ordType,
   identifier,
   timeInForce,
 }) => {
@@ -121,7 +121,7 @@ export const postOrder = ({
       side,
       volume,
       price,
-      ord_type: ordType,
+      ord_type: ordType || (side === 'bid' ? 'price' : 'market'),
       identifier,
       time_in_force: timeInForce,
     },

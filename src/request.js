@@ -8,11 +8,20 @@ import env from './env';
 import { filterEmptyValues, flatternArrayValues } from './utils';
 import logger from './utils/logger';
 
-const jwtToken = (body = {}, { encode = true } = {}) => {
-  const _body = body;
-  const query = encode
-    ? querystring.encode(_body)
-    : new URLSearchParams(_body).toString();
+const jwtToken = (body = {}) => {
+  const _isArray = ([key, _]) => key.includes('[]');
+
+  const arrayQuery = Object.entries(body)
+    .filter(_isArray)
+    .map(([key, value]) => `${key}=${value}`)
+    .join('&');
+  const noneArrayQuery = querystring.encode(
+    Object.fromEntries(
+      Object.entries(body).filter(([key, _]) => !_isArray([key, _]))
+    )
+  );
+  const query =
+    arrayQuery + (arrayQuery && noneArrayQuery ? '&' : '') + noneArrayQuery;
   const queryHash = crypto
     .createHash('sha512')
     .update(query, 'utf-8') // todo: encode or not(array)
@@ -35,7 +44,7 @@ const _axios = axios.create({
 
 _axios.interceptors.request.use((config) => {
   config.params = flatternArrayValues(filterEmptyValues(config.params ?? {}));
-  config.headers.Authorization = `Bearer ${jwtToken(config.params ?? {})}`;
+  config.headers.Authorization = `Bearer ${jwtToken(config.params)}`;
   logger.debug(
     `[API - request] ${config.method} ${config.url} ${JSON.stringify(config.params)}`
   );
@@ -51,10 +60,10 @@ _axios.interceptors.response.use(
   },
   (error) => {
     logger.error(
-      `[API - response Error] ${error.config.method} ${error.config.url} ${JSON.stringify(error.response.data)}`
+      `[API - response Error] ${error.config?.method} ${error.config?.url} ${JSON.stringify(error.response?.data)}`
     );
     // return Promise.reject(error);
-    return error;
+    return error.response;
   }
 );
 

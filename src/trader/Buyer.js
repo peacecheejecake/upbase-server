@@ -1,10 +1,9 @@
-import dayjs from 'dayjs';
 import { getCandles, postOrder, getOrdersByIds } from '../api';
 import { addOrder } from '../db/order';
 import logger from '../utils/logger';
 import { COMMISION_RATE } from './constants';
-// import { modifyOrderHoldingState } from '../db/order.js';
-// import { average } from '../utils';
+import { modifyOrderHoldingState } from '../db/order.js';
+import { average } from '../utils';
 
 class Buyer {
   #timer;
@@ -86,7 +85,7 @@ class Buyer {
   }
   async consider() {
     const pastCandles = await this._getSecondCandles();
-    const currentPrice = await this.#loader.currentPrice();
+    const currentPrice = await this.#loader.currentPrice?.();
 
     if (!pastCandles || !currentPrice) return null;
 
@@ -103,14 +102,23 @@ class Buyer {
   }
   async buy({ price, balance }) {
     const _balance = Math.min(balance, this.limit ?? Infinity);
+    // const _price = ;
+    // const _volume = _balance * this.proportion * (1 - COMMISION_RATE) / price;
     // const _volume =
     //   () / price;'
     // logger.debug(
     //   `balance: ${_balance}, COMMISION_RATE: ${COMMISION_RATE}, proportion: ${this.proportion}, price: ${_balance * this.proportion * (1 - COMMISION_RATE)}`
     // );
+    const volume = (_balance * this.proportion * (1 - COMMISION_RATE)) / price;
+
+    if (price * volume < 5000) {
+      logger.warn(`[Buyer] 최소주문금액 이하: ${price}`);
+      return null;
+    }
+
     return await this._makeOrder({
-      price: _balance * this.proportion * (1 - COMMISION_RATE),
-      // volume: _volume,
+      price,
+      volume,
     });
   }
   async addOrderToDatabase({ uuid }) {
@@ -137,15 +145,27 @@ class Buyer {
     logger.debug(`[Buyer] checkOrderUntilClosed START: ${uuid}`);
     const timer = setInterval(async () => {
       const response = await getOrdersByIds({ uuids: [uuid] });
-
       const order = (response?.data ?? []).find(
-        ({ uuid: _uuid, state }) => _uuid === uuid
+        ({ uuid: _uuid }) => _uuid === uuid
       );
 
-      if (order?.state === 'done') {
-        clearInterval(timer);
+      if (!order) return;
+
+      if (order.state === 'done' || order.state === 'cancel') {
         // modifyOrderHoldingState({ uuid, holdiang: true });
-        addOrder({ ...order, holding: true });
+        const _volume = Number(order.executed_volume ?? 0);
+        if (_volume > 0) {
+          addOrder({
+            ...order,
+            unit_price:
+              order.ord_type === 'price'
+                ? Number(order.price) / _volume
+                : order.price,
+            holding: true,
+          });
+        }
+
+        clearInterval(timer);
         logger.info(`[Buyer] checkOrderUntilClosed CLOSED: ${uuid}`);
       }
     }, 1000);
@@ -168,16 +188,12 @@ class Buyer {
     return response?.data?.length > 0 ? response.data : null;
   }
   async _makeOrder({ price, volume }) {
-    if (price < 5000) {
-      logger.warn(`[Buyer] 최소주문금액 이하: ${price}`);
-      return null;
-    }
     const response = await postOrder({
       market: this.market,
       side: 'bid',
-      ordType: 'price',
+      ordType: 'limit',
       price,
-      // volume,
+      volume,
     });
     return response?.data;
   }

@@ -5,7 +5,7 @@ export const average = (...nums) => {
 };
 
 export const sum = (...nums) => {
-  return nums.reduce((acc, cur) => acc + cur, 0);
+  return nums.reduce((acc, cur) => acc + Number(cur), 0);
 };
 
 export const formatDatetime = (datetime) => {
