@@ -7,21 +7,30 @@ import { COMMISION_RATE } from './constants';
 
 class Seller {
   #timer;
-  #loader;
+  #getCurrentPrice = null;
+  #getBalance = null;
+  // #loader;
   // #buyer;
 
   constructor({
     market,
-    loader,
+    // loader,
     // buyer,
     thresholdWin = 0.005,
     thresholdLose = -0.02,
     interval = 60,
+    currentPrice,
+    balance,
+
+    //todo
     periodLimit = null,
   }) {
     this.market = market;
 
-    this.#loader = loader;
+    this.#getCurrentPrice = currentPrice;
+    this.#getBalance = balance;
+
+    // this.#loader = loader;
     // this.#buyer = buyer;
 
     this.thresholdWin = thresholdWin;
@@ -29,6 +38,7 @@ class Seller {
     this.interval = interval;
     this.periodLimit = periodLimit;
   }
+
   get options() {
     return {
       market: this.market,
@@ -38,6 +48,13 @@ class Seller {
       periodLimit: this.periodLimit,
     };
   }
+  get currentPrice() {
+    return this.#getCurrentPrice();
+  }
+  get balance() {
+    return this.#getBalance();
+  }
+
   async start({ immediate = false } = {}) {
     logger.debug('Seller: ', this.options);
 
@@ -51,18 +68,16 @@ class Seller {
   }
   async once() {
     logger.debug(`[Seller] START`);
-    const { holdingOrders, sellingList, sellingPrice, balance } =
-      (await this.consider()) ?? {};
+    const { holdingOrders, sellingList } = (await this.consider()) ?? {};
     // const { rate, sellingPrice, isOut, balance } =
     //   (await this.consider()) ?? {};
 
-    if (!sellingList?.length || !sellingPrice) {
+    if (!sellingList?.length || !this.currentPrice) {
       // if (!isOut) {
       logger.debug(`[Seller] CANCEL:`, {
         // rates: JSON.stringify(rates),
-        holdingOrders: holdingOrders.length,
-        sellingList: sellingList.length,
-        // rate,
+        holdingOrders: holdingOrders?.length,
+        sellingList: sellingList?.length,
         // sellingPrice,
       });
       return;
@@ -76,93 +91,57 @@ class Seller {
         // const price = Number(unit_price);
         const { uuid: uuidSell, error } =
           (await this.sell({
-            price: sellingPrice,
-            volume: balance === null ? volume : Math.min(balance, volume),
+            price: this.currentPrice,
+            volume: this.balance ? Math.min(this.balance, volume) : volume,
           })) ?? {};
 
         if (error?.name === 'insufficient_funds_ask') {
+          //todo
           volumeNotSold += volume;
-          // deleteOrder({ uuid });
+
           modifyOrderHoldingState({ uuid: uuidBuy, holding: false });
           return;
         }
 
         if (!uuidSell) return;
 
-        // const rate = (sellingPrice - price) / price;
+        modifyOrderHoldingState({ uuid: uuidBuy, holding: false });
 
         logger.info(
-          `[Seller] SELL - price(sell): ${sellingPrice}, price(buy): ${price}, rate: ${rate}, volume: ${volume}`
+          `[Seller] SELL - price(sell): ${this.currentPrice}, price(buy): ${unit_price}, rate: ${rate}, volume: ${volume}`
         );
-
-        this.checkUntilClosed({ uuid: uuidBuy });
       }
     );
 
-    setTimeout(async () => {
-      const balance = (await this.getCoinAccount())?.balance;
+    if (volumeNotSold > 0) {
+      setTimeout(async () => {
+        const balance = (await this.getCoinAccount())?.balance;
 
-      if (volumeNotSold > 0 && balance > 0) {
-        logger.info(`[Seller] Try to sell not sold: ${volumeNotSold}`);
+        if (balance > 0) {
+          logger.info(`[Seller] Try to sell not sold: ${volumeNotSold}`);
 
-        const { uuid } = await this.sell({
-          price: sellingPrice,
-          volume: Math.min(balance, volumeNotSold),
-        });
+          const { uuid } =
+            (await this.sell({
+              price: this.currentPrice,
+              volume: Math.min(balance, volumeNotSold),
+            })) ?? {};
 
-        if (uuid) {
-          logger.info(
-            `[Seller] SELL - price: ${sellingList}, volume: ${volumeNotSold}`
-          );
+          if (uuid) {
+            logger.info(
+              `[Seller] SELL - price: ${sellingList}, volume: ${volumeNotSold}`
+            );
+          }
         }
-      }
-    }, 1000);
-
-    // const volume = sum(
-    //   ...sellingList.map(
-    //     ({ volume, executed_volume }) =>
-    //       Number(volume ?? 0) || Number(executed_volume ?? 0)
-    //   )
-    // );
-    // // const volume = balance;
-    // const data = await this.sell({
-    //   // price: sellingPrice,
-    //   volume: balance === null ? volume : Math.min(balance, volume),
-    // });
-    // const { uuid } = data ?? {};
-
-    // if (uuid) {
-    //   const rate = (sellingPrice - price) / price;
-    //   logger.info(
-    //     `[Seller] SELL[${this.market}]: price: ${sellingPrice}, volume: ${volume}, rate: ${rate}`
-    //   );
-    //   // sellingList.forEach(async ({ uuid }) => {
-    //   //   try {
-    //   //     const { rowCount } = await modifyOrderHoldingState({
-    //   //       uuid,
-    //   //       holding: false,
-    //   //     });
-
-    //   //     if (rowCount !== sellingList.length) {
-    //   //       logger.warn(
-    //   //         `Try to sell ${sellingList.length}, but ${rowCount} done`
-    //   //       );
-    //   //     }
-    //   //   } catch (e) {
-    //   //     logger.error('Error on modifyOrderHoldingState: ', e);
-    //   //   }
-    //   // });
-
-    //   this.checkUntilClosed({ uuid });
-    // }
+      }, 1000);
+    }
   }
   async consider() {
-    const currentPrice = await this.#loader.currentPrice?.();
+    // const currentPrice = await this.#loader.currentPrice?.();
     const holdingOrders = await this.getHoldingOrders();
-    const coinAccount = await this.getCoinAccount();
+    // const coinAccount = await this.getCoinAccount();
 
     // if (!currentPrice || !coinAccount) return;
-    if (!currentPrice || !holdingOrders) return;
+    if (!this.currentPrice || !holdingOrders) return;
 
     const validOrders = holdingOrders.filter(({ executed_volume, volume }) => {
       const _volume = Number(volume ?? 0) || Number(executed_volume ?? 0);
@@ -176,24 +155,27 @@ class Seller {
     // const rate = (currentPrice - priceBuy) / priceBuy;
     const sellingList = validOrders
       .map((order) => {
-        const { price } = order;
+        const { unit_price } = order;
         // const unitPrice = Number(price) / Number(executed_volume);
-        const unitPrice = Number(price);
-        const rate = (currentPrice - unitPrice) / unitPrice;
+        const unitPrice = Number(unit_price);
+        const rate = (this.currentPrice - unitPrice) / unitPrice;
+        console.log(
+          `[Seller] considering - priceBuy: ${unitPrice}, currentPrice: ${this.currentPrice} rate: ${rate}`
+        );
         return { ...order, rate };
       })
       .filter(
         ({ rate }) => rate >= this.thresholdWin || rate <= this.thresholdLose
       );
-    const balance = coinAccount?.balance ? Number(coinAccount.balance) : null;
+    // const balance = coinAccount?.balance ? Number(coinAccount.balance) : null;
 
     return {
       holdingOrders,
       sellingList,
       // isOut: rate <= this.thresholdLose || rate >= this.thresholdWin,
       // rate,
-      balance,
-      sellingPrice: currentPrice,
+      // balance,
+      // sellingPrice: this.currentPrice,
     };
   }
   sell({ price, volume }) {
@@ -201,47 +183,25 @@ class Seller {
       logger.warn(`[Seller] 최소주문금액 이하: ${price}`);
       return null;
     }
-    return this._makeOrder({ price, volume });
+    return this._makeOrder({
+      ordType: 'limit',
+      price,
+      volume,
+    });
   }
   async sellAll() {
     const coinAccount = await this.getCoinAccount();
-    const currentPrice = await this.#loader.currentPrice?.();
+    // const currentPrice = await this.#loader.currentPrice?.();
 
-    if (!coinAccount || !currentPrice) return;
+    if (!coinAccount || !this.currentPrice) return;
 
     const coinBalance = Number(coinAccount.balance);
     const response = await this.sell({
-      price: currentPrice,
+      price: this.currentPrice,
       volume: coinBalance,
     });
 
     logger.log('SELL ALL: ', response?.data);
-  }
-  async checkUntilClosed({ uuid }) {
-    logger.debug(`[Seller] checkOrderUntilClosed START: ${uuid}`);
-    const timer = setInterval(async () => {
-      const response = await getOrdersByIds({ uuids: [uuid] });
-      const order = (response?.data ?? []).find(
-        ({ uuid: _uuid, side }) => _uuid === uuid && side == 'ask'
-      );
-
-      if (!order) return;
-
-      if (order.state === 'done' || order.state === 'cancel') {
-        // modifyOrderHoldingState({ uuid, holdiang: true });
-        // const _volume = Number(order.executed_volume ?? 0);
-        deleteOrder({ uuid });
-
-        clearInterval(timer);
-        logger.info(`[Seller] checkOrderUntilClosed CLOSED: ${uuid}`);
-      }
-    }, 30000);
-    // let isClosed = false;
-    // while (!isClosed) {
-    //   const holdingOrders = await this.getHoldingOrders();
-
-    //   isClosed = !holdingOrders.some(({ uuid: u }) => u === uuid);
-    // }
   }
   async getHoldingOrders() {
     const res = await getOrders({
@@ -258,11 +218,11 @@ class Seller {
         )
       : null;
   }
-  async _makeOrder({ price, volume }) {
+  async _makeOrder({ price, volume, ordType = 'limit' }) {
     const response = await postOrder({
       market: this.market,
       side: 'ask',
-      ordType: 'limit',
+      ordType,
       price,
       volume,
     });

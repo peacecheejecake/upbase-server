@@ -61,6 +61,7 @@ export const addOrder = (data) => {
     time_in_force,
     identifier,
     holding,
+    unit_price
   } 
   */
   const keys = Object.keys(data);

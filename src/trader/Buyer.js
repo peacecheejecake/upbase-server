@@ -2,26 +2,35 @@ import { getCandles, postOrder, getOrdersByIds } from '../api';
 import { addOrder } from '../db/order';
 import logger from '../utils/logger';
 import { COMMISION_RATE } from './constants';
-import { modifyOrderHoldingState } from '../db/order.js';
-import { average } from '../utils';
+import { getRecentSecondCandles } from '../db/candle.js';
 
 class Buyer {
   #timer;
-  #loader;
+  // #loader;
   #isWaitingResume = false;
+
+  #getCurrentPrice = null;
+  #getBalance = null;
 
   constructor({
     market,
-    loader = {},
+    proportion = 1.0,
+    // loader = {},
     windowSize = 60,
     threshold = -0.005,
-    proportion = 1.0,
     interval = 60,
+
+    currentPrice,
+    balance,
+
+    //todo
     limit = null,
   }) {
     this.market = market;
 
-    this.#loader = loader;
+    // this.#loader = loader;
+    this.#getCurrentPrice = currentPrice;
+    this.#getBalance = balance;
 
     this.windowSize = windowSize;
     this.threshold = threshold;
@@ -29,6 +38,7 @@ class Buyer {
     this.interval = interval;
     this.limit = limit;
   }
+
   get options() {
     return {
       market: this.market,
@@ -39,6 +49,13 @@ class Buyer {
       limit: this.limit,
     };
   }
+  get currentPrice() {
+    return this.#getCurrentPrice();
+  }
+  get balance() {
+    return this.#getBalance();
+  }
+
   async start({ immediate = false } = {}) {
     logger.debug('Buyer: ', this.options);
 
@@ -65,133 +82,66 @@ class Buyer {
   async once() {
     logger.debug(`[Buyer] START`);
     const { isIn, buyingPrice, rate } = (await this.consider()) ?? {};
-    const balance = await this.#loader.balance?.();
+    // const balance = await this.#loader.balance?.();
 
-    if (!isIn || !balance) {
-      logger.debug(`[Buyer] CANCEL: balance: ${balance}, rate: ${rate}`);
+    if (!isIn || !this.balance) {
+      logger.debug(`[Buyer] CANCEL: balance: ${this.balance}, rate: ${rate}`);
       return;
     }
 
     const data = await this.buy({
       price: buyingPrice,
-      balance,
     });
     const { uuid } = data ?? {};
 
     if (uuid) {
       logger.info(`[Buyer] BUY - price: ${buyingPrice}, rate: ${rate}`);
-      this.addOrderToDatabase(data);
     }
   }
   async consider() {
-    const pastCandles = await this._getSecondCandles();
-    const currentPrice = await this.#loader.currentPrice?.();
+    const recentCandles = await this.getRecentCandles();
 
-    if (!pastCandles || !currentPrice) return null;
+    if (!recentCandles || !this.currentPrice) return null;
 
     const highestOfLows = Math.max(
-      ...pastCandles.map(({ low_price }) => Number(low_price))
+      ...recentCandles.map(({ low_price }) => Number(low_price))
     );
-    const diffRate = (currentPrice - highestOfLows) / highestOfLows;
+    const diffRate = (this.currentPrice - highestOfLows) / highestOfLows;
 
     return {
       isIn: diffRate <= this.threshold,
-      buyingPrice: currentPrice,
+      buyingPrice: this.currentPrice,
       rate: diffRate,
     };
   }
-  async buy({ price, balance }) {
-    const _balance = Math.min(balance, this.limit ?? Infinity);
-    // const _price = ;
-    // const _volume = _balance * this.proportion * (1 - COMMISION_RATE) / price;
-    // const _volume =
-    //   () / price;'
-    // logger.debug(
-    //   `balance: ${_balance}, COMMISION_RATE: ${COMMISION_RATE}, proportion: ${this.proportion}, price: ${_balance * this.proportion * (1 - COMMISION_RATE)}`
-    // );
+  async buy({ price }) {
+    const _balance = Math.min(this.balance, this.limit ?? Infinity);
     const volume = (_balance * this.proportion * (1 - COMMISION_RATE)) / price;
+    const totalPrice = price * volume;
 
-    if (price * volume < 5000) {
+    if (totalPrice < 5000) {
       logger.warn(`[Buyer] 최소주문금액 이하: ${price}`);
       return null;
     }
 
     return await this._makeOrder({
+      ordType: 'limit',
       price,
       volume,
     });
   }
-  async addOrderToDatabase({ uuid }) {
-    // const { side, ...order } = data;
-
-    // const { remaining_volume, executed_volume } = order;
-    // console.log(order);
-    // const volume = Number(remaining_volume) + Number(executed_volume);
-
-    // await addOrder({
-    //   ...order,
-    //   volume,
-    //   holding: false,
-    // });
-
-    //todo
-    this.checkOrderUntilClosed({ uuid });
-
-    // setTimeout(() => {
-    //   modifyOrderHoldingState({ uuid: data.uuid, holding: true });
-    // }, 1000);
-  }
-  checkOrderUntilClosed({ uuid }) {
-    logger.debug(`[Buyer] checkOrderUntilClosed START: ${uuid}`);
-    const timer = setInterval(async () => {
-      const response = await getOrdersByIds({ uuids: [uuid] });
-      const order = (response?.data ?? []).find(
-        ({ uuid: _uuid }) => _uuid === uuid
-      );
-
-      if (!order) return;
-
-      if (order.state === 'done' || order.state === 'cancel') {
-        // modifyOrderHoldingState({ uuid, holdiang: true });
-        const _volume = Number(order.executed_volume ?? 0);
-        if (_volume > 0) {
-          addOrder({
-            ...order,
-            unit_price:
-              order.ord_type === 'price'
-                ? Number(order.price) / _volume
-                : order.price,
-            holding: true,
-          });
-        }
-
-        clearInterval(timer);
-        logger.info(`[Buyer] checkOrderUntilClosed CLOSED: ${uuid}`);
-      }
-    }, 1000);
-  }
-
-  async _getMinuteCandles() {
-    const response = await getCandles({
-      unit: 'minutes',
+  async getRecentCandles() {
+    const candles = await getRecentSecondCandles({
       market: this.market,
-      count: this.windowSize,
+      count: 60,
     });
-    return response?.data?.length > 0 ? response.data : null;
+    return candles?.rows ?? null;
   }
-  async _getSecondCandles() {
-    const response = await getCandles({
-      unit: 'seconds',
-      market: this.market,
-      count: this.windowSize,
-    });
-    return response?.data?.length > 0 ? response.data : null;
-  }
-  async _makeOrder({ price, volume }) {
+  async _makeOrder({ ordType = 'limit', price, volume }) {
     const response = await postOrder({
       market: this.market,
       side: 'bid',
-      ordType: 'limit',
+      ordType,
       price,
       volume,
     });
