@@ -1,4 +1,4 @@
-import request from '../request';
+import request from '../request.js';
 
 export const getWithdrawsChance = ({ currency, netType }) => {
   return request.get('/v1/withdraws/chance', {

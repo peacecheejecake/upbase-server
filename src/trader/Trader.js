@@ -1,8 +1,7 @@
-import { getCandles, getAccounts, getCurrentPrices } from '../api';
-import { average } from '../utils';
-import logger from '../utils/logger';
-import Buyer from './Buyer';
-import Seller from './Seller';
+import { getAccounts } from '../api/index.js';
+import logger from '../utils/logger.js';
+import Buyer from './Buyer.js';
+import Seller from './Seller.js';
 import CandleFetcher from './CandleFetcher.js';
 
 import TickerSocket from '../socket/TickerSocket.js';

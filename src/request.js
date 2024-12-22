@@ -4,9 +4,9 @@ import jsonwebtoken from 'jsonwebtoken';
 import crypto from 'crypto';
 import querystring from 'querystring';
 
-import env from './env';
-import { filterEmptyValues, flatternArrayValues } from './utils';
-import logger from './utils/logger';
+import env from './env.js';
+import { filterEmptyValues, flatternArrayValues } from './utils/index.js';
+import logger from './utils/logger.js';
 
 const jwtToken = (body = {}) => {
   const _isArray = ([key, _]) => key.includes('[]');

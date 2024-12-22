@@ -1,4 +1,4 @@
-import Trader from './trader';
+import Trader from './trader/Trader.js';
 import CandleFetcher from './trader/CandleFetcher.js';
 
 class App {
@@ -13,7 +13,6 @@ class App {
       market,
       intervalBuy,
       intervalSell,
-      candleFetcher: this.#candleFetcher,
     });
 
     setTimeout(() => {

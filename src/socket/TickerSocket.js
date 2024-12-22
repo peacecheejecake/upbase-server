@@ -1,5 +1,4 @@
 import Socket from './base/Socket.js';
-import logger from '../utils/logger.js';
 
 class TickerSocket extends Socket {
   #markets = [];

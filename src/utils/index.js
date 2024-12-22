@@ -1,4 +1,4 @@
-import dayjs, { utc } from './dayjs';
+import dayjs, { utc } from './dayjs.js';
 
 export const average = (...nums) => {
   return nums.reduce((acc, cur) => acc + Number(cur), 0) / nums.length;
@@ -9,7 +9,7 @@ export const sum = (...nums) => {
 };
 
 export const formatDatetime = (datetime) => {
-  const _datetime = new dayjs(datetime);
+  const _datetime = dayjs(datetime);
   if (!_datetime.isValid()) return null;
   return new utc(_datetime).local().format();
 };

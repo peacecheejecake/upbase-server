@@ -1,7 +1,6 @@
-import { getCandles, postOrder, getOrdersByIds } from '../api';
-import { addOrder } from '../db/order';
-import logger from '../utils/logger';
-import { COMMISION_RATE } from './constants';
+import { postOrder } from '../api/index.js';
+import logger from '../utils/logger.js';
+import { COMMISION_RATE } from './constants.js';
 import { getRecentSecondCandles } from '../db/candle.js';
 
 class Buyer {

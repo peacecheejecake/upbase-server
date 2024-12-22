@@ -1,4 +1,4 @@
-import request from '../request';
+import request from '../request.js';
 
 export const getAvailableMarkets = ({ isDetails = false }) => {
   return request.get('/v1/market/all', {

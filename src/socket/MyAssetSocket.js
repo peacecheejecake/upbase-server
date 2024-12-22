@@ -1,6 +1,5 @@
 import Socket from './base/Socket.js';
 import logger from '../utils/logger.js';
-import { getAccounts } from '../api/order.js';
 
 class MyAssetSocket extends Socket {
   #assets;

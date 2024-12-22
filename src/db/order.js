@@ -1,4 +1,4 @@
-import client from './client';
+import client from './client.js';
 import logger from '../utils/logger.js';
 
 export const getOrders = (query = {}) => {

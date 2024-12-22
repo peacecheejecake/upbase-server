@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import Socket from './base/Socket.js';
 import logger from '../utils/logger.js';
-import { modifyOrderHoldingState, addOrder } from '../db/order.js';
+import { addOrder } from '../db/order.js';
 
 class MyOrderSocket extends Socket {
   // #orders = [];
