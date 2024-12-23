@@ -64,7 +64,7 @@ class Seller {
     this.#timer = null;
   }
   async once() {
-    logger.debug(`[Seller] START`);
+    // logger.debug(`[Seller] START`);
     const { holdingOrders, sellingList } = (await this.consider()) ?? {};
     // const { rate, sellingPrice, isOut, balance } =
     //   (await this.consider()) ?? {};
@@ -181,7 +181,7 @@ class Seller {
       return null;
     }
     return this._makeOrder({
-      ordType: 'market',
+      ordType: 'limit',
       price,
       volume,
     });
@@ -220,7 +220,7 @@ class Seller {
       market: this.market,
       side: 'ask',
       ordType,
-      price,
+      price: ordType === 'market' ? undefined : price,
       volume,
     });
     return response?.data ?? null;

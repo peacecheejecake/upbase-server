@@ -21,9 +21,43 @@ class MyOrderSocket extends Socket {
           if (!order?.uuid) return;
           // this.#orders = orders;
 
-          const { uuid, ask_bid, state, executed_volume } = order;
+          const {
+            uuid,
+            ask_bid,
+            order_type,
+            state,
+            executed_volume,
+            executed_funds,
+            paid_fee,
+            price,
+            avg_price,
+          } = order;
+          const _volume = (() => {
+            if (order_type === 'price') {
+              return (
+                (Number(executed_funds) + Number(paid_fee)) / Number(avg_price)
+              );
+            }
 
-          if (executed_volume > 0 && (state === 'done' || state === 'cancel')) {
+            return Number(executed_volume);
+          })();
+          const _price = (() => {
+            if (order_type === 'price') {
+              return Number(price) / _volume;
+            }
+
+            if (order_type === 'market') {
+              return (
+                Number(avg_price) + Number(paid_fee) / Number(executed_volume)
+              );
+            }
+
+            return Number(avg_price);
+          })();
+
+          // logger.verbose(`[MyOrderSocket] ${JSON.stringify(order)}`);
+
+          if (_volume > 0 && (state === 'done' || state === 'cancel')) {
             // if (ask_bid === 'BID') {
             // logger.debug(`[MyOrderSocket] addOrder - ${uuid}`);
             // } else if (ask_bid === 'ASK') {
@@ -31,9 +65,15 @@ class MyOrderSocket extends Socket {
             // logger.debug(`[MyOrderSocket] modifyOrderHoldingState - ${uuid}`);
             // }
             logger.debug(
-              `[MyOrderSocket] closed - ${ask_bid}, ${state}, ${uuid}`
+              `[MyOrderSocket] closed - ${ask_bid}, ${state}, ${uuid}, ${_price}`
             );
-            this.addOrderToDatabase(order);
+            this.addOrderToDatabase({
+              ...order,
+              price: _price,
+              unit_price: _price,
+              volume: _volume,
+              executed_volume: _volume,
+            });
           }
         } catch (error) {
           logger.error('[MyOrderSocket] error', error);
@@ -68,15 +108,16 @@ class MyOrderSocket extends Socket {
       trade_timestamp,
       order_timestamp,
       timestamp,
+      unit_price,
     } = order;
-    const _price = avg_price;
+    // const _price = avg_price;
 
     addOrder({
       // ...orders,
       side: ask_bid.toLowerCase(),
       uuid,
       ord_type: order_type,
-      price: _price,
+      price,
       state,
       market: code,
       created_at: dayjs(new Date(timestamp)).format('YYYY-MM-DD HH:mm:ss'),
@@ -92,8 +133,7 @@ class MyOrderSocket extends Socket {
       time_in_force,
       identifier,
       holding: ask_bid === 'BID',
-      unit_price:
-        order_type === 'price' ? Number(_price) / executed_volume : price,
+      unit_price,
     });
   }
   // clearOrders() {

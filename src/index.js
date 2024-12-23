@@ -11,7 +11,7 @@ app.init({
   market: args.market ?? 'KRW-IOTA',
   intervalBuy: args.interval ? Number(args.interval) : 5,
   intervalSell: args.interval ? Number(args.interval) : 5,
-  thresholdBuy: args['t-buy'] ? Number(args['t-buy']) : -0.002,
-  thresholdSellWin: args['t-sell-win'] ? Number(args['t-sell-win']) : 0.002,
+  thresholdBuy: args['t-buy'] ? Number(args['t-buy']) : -0.0025,
+  thresholdSellWin: args['t-sell-win'] ? Number(args['t-sell-win']) : 0.0025,
   thresholdSellLose: args['t-sell-lose'] ? Number(args['t-sell-lose']) : -0.02,
 });

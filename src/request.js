@@ -45,25 +45,24 @@ const _axios = axios.create({
 _axios.interceptors.request.use((config) => {
   config.params = flatternArrayValues(filterEmptyValues(config.params ?? {}));
   config.headers.Authorization = `Bearer ${jwtToken(config.params)}`;
-  logger.log(
-    'verbose',
-    `[API - request] ${config.method} ${config.url} ${JSON.stringify(config.params)}`
-  );
+  // logger.log(
+  //   'verbose',
+  //   `[API - request] ${config.method} ${config.url} ${JSON.stringify(config.params)}`
+  // );
   return config;
 });
 
 _axios.interceptors.response.use(
   (response) => {
-    logger.log(
-      'verbose',
-      `[API - response Success] ${response.config.method} ${response.config.url}`
-    );
+    // logger.log(
+    //   'verbose',
+    //   `[API - response Success] ${response.config.method} ${response.config.url}`
+    // );
     return response;
   },
   (error) => {
-    logger.log(
-      'verbose',
-      `[API - response Error] ${error.config?.method} ${error.config?.url} ${JSON.stringify(error.response?.data)}`
+    logger.error(
+      `[API - response Error] ${error.config?.method} ${error.config?.url} ${JSON.stringify(error.config?.params)} ${JSON.stringify(error.response?.data)}`
     );
     // return Promise.reject(error);
     return error.response;

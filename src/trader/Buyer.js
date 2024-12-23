@@ -79,7 +79,7 @@ class Buyer {
     this.start();
   }
   async once() {
-    logger.debug(`[Buyer] START`);
+    // logger.debug(`[Buyer] START`);
     const { isIn, buyingPrice, rate } = (await this.consider()) ?? {};
     // const balance = await this.#loader.balance?.();
 
@@ -90,6 +90,7 @@ class Buyer {
 
     const data = await this.buy({
       price: buyingPrice,
+      rate,
     });
     const { uuid } = data ?? {};
 
@@ -113,18 +114,18 @@ class Buyer {
       rate: diffRate,
     };
   }
-  async buy({ price }) {
+  async buy({ price, rate }) {
     const _balance = Math.min(this.balance, this.limit ?? Infinity);
     const volume = (_balance * this.proportion * (1 - COMMISION_RATE)) / price;
     const totalPrice = price * volume;
 
     if (totalPrice < 5000) {
-      logger.warn(`[Buyer] 최소주문금액 이하: ${price}`);
+      logger.warn(`[Buyer] 최소주문금액 이하: ${price}, ${rate}`);
       return null;
     }
 
     return await this._makeOrder({
-      ordType: 'price',
+      ordType: 'limit',
       price,
       volume,
     });
