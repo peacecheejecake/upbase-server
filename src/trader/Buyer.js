@@ -124,7 +124,7 @@ class Buyer {
     }
 
     return await this._makeOrder({
-      ordType: 'limit',
+      ordType: 'price',
       price,
       volume,
     });
@@ -141,8 +141,8 @@ class Buyer {
       market: this.market,
       side: 'bid',
       ordType,
-      price,
-      volume,
+      price: ordType === 'price' ? price * volume : price,
+      volume: ordType === 'price' ? undefined : volume,
     });
     return response?.data;
   }

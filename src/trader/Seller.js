@@ -181,7 +181,7 @@ class Seller {
       return null;
     }
     return this._makeOrder({
-      ordType: 'limit',
+      ordType: 'market',
       price,
       volume,
     });
