@@ -13,6 +13,8 @@ class App {
       market,
       intervalBuy,
       intervalSell,
+      thresholdBuy: -0.002,
+      thresholdSellWin: 0.002,
     });
 
     setTimeout(() => {

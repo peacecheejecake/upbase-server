@@ -1,3 +1,5 @@
+import util from 'utils';
+
 import App from './App.js';
 
 const app = new App();
