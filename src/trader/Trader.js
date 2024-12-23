@@ -68,8 +68,8 @@ class Trader {
     // this.seller.start({ immediate });
   }
   async once() {
-    await this.seller?.once?.();
     await this.buyer?.once?.();
+    await this.seller?.once?.();
   }
   async fetchCandle() {
     try {
