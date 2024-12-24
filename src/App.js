@@ -14,6 +14,7 @@ class App {
     thresholdBuy = -0.005,
     thresholdSellWin = 0.005,
     thresholdSellLose = -0.02,
+    timeInForce = undefined,
   }) {
     this.#candleFetcher = new CandleFetcher({ market });
     this.#candleFetcher.batch({ count: 100 });
@@ -27,6 +28,7 @@ class App {
       thresholdSellLose,
       orderTypeBuy,
       orderTypeSell,
+      timeInForce,
     });
 
     setTimeout(() => {

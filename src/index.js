@@ -16,4 +16,5 @@ app.init({
   thresholdSellLose: args['t-sell-lose'] ? Number(args['t-sell-lose']) : -0.02,
   orderTypeBuy: args['order-type-buy'],
   orderTypeSell: args['order-type-sell'],
+  timeInForce: args['time-in-force'],
 });

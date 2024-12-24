@@ -27,6 +27,7 @@ class Trader {
     proportion = 1.0,
     intervalBuy = 60,
     intervalSell = 60,
+    timeInForce = undefined,
   }) {
     this.market = market;
 
@@ -39,6 +40,7 @@ class Trader {
       orderType: orderTypeBuy,
       currentPrice: this.getCurrentPrice.bind(this),
       balance: this.getBalanceKRW.bind(this),
+      timeInForce,
       // loader: {
       //   balance: this.getBalanceKRW.bind(this),
       //   currentPrice: this.getCurrentPrice.bind(this),
@@ -52,6 +54,7 @@ class Trader {
       orderType: orderTypeSell,
       currentPrice: this.getCurrentPrice.bind(this),
       balance: this.getBalanceCoin.bind(this),
+      timeInForce,
       // loader: {
       //   currentPrice: this.getCurrentPrice.bind(this),
       // },

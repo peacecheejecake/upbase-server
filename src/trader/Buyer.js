@@ -14,11 +14,11 @@ class Buyer {
   constructor({
     market,
     proportion = 1.0,
-    // loader = {},
     windowSize = 60,
     threshold = -0.005,
     interval = 60,
     orderType = 'limit',
+    timeInForce = undefined,
 
     currentPrice,
     balance,
@@ -37,6 +37,7 @@ class Buyer {
     this.proportion = proportion;
     this.interval = interval;
     this.orderType = orderType;
+    this.timeInForce = timeInForce;
     this.limit = limit;
   }
 
@@ -145,6 +146,7 @@ class Buyer {
       ordType: this.orderType,
       price: this.orderType === 'price' ? price * volume : price,
       volume: this.orderType === 'price' ? undefined : volume,
+      timeInForce: this.timeInForce,
     });
     return response?.data;
   }

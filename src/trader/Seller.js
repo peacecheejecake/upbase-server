@@ -19,6 +19,7 @@ class Seller {
     orderType = 'limit',
     currentPrice,
     balance,
+    timeInForce,
 
     //todo
     periodLimit = null,
@@ -36,6 +37,7 @@ class Seller {
     this.interval = interval;
     this.orderType = orderType;
     this.periodLimit = periodLimit;
+    this.timeInForce = timeInForce;
   }
 
   get options() {
