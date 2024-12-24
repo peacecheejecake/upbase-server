@@ -5,13 +5,15 @@ class App {
   #trader;
   #candleFetcher;
 
-  async init({ 
-    market, 
-    intervalBuy, 
-    intervalSell, 
-    thresholdBuy = -0.005, 
-    thresholdSellWin = 0.005, 
-    thresholdSellLose = -0.02 
+  async init({
+    market,
+    intervalBuy,
+    intervalSell,
+    orderTypeBuy,
+    orderTypeSell,
+    thresholdBuy = -0.005,
+    thresholdSellWin = 0.005,
+    thresholdSellLose = -0.02,
   }) {
     this.#candleFetcher = new CandleFetcher({ market });
     this.#candleFetcher.batch({ count: 100 });
@@ -23,6 +25,8 @@ class App {
       thresholdBuy,
       thresholdSellWin,
       thresholdSellLose,
+      orderTypeBuy,
+      orderTypeSell,
     });
 
     setTimeout(() => {

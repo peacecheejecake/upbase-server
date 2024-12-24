@@ -8,7 +8,8 @@ export const processArguments = (args, keys) => {
     't-sell-lose',
     'market',
     'interval',
-    'order-type',
+    'order-type-buy',
+    'order-type-selling',
   ];
   const patternIsReserved = new RegExp(
     `^--(${reservedKeys.join('|')})=[^=]+$`,

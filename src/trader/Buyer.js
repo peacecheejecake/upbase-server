@@ -18,6 +18,7 @@ class Buyer {
     windowSize = 60,
     threshold = -0.005,
     interval = 60,
+    orderType = 'limit',
 
     currentPrice,
     balance,
@@ -35,6 +36,7 @@ class Buyer {
     this.threshold = threshold;
     this.proportion = proportion;
     this.interval = interval;
+    this.orderType = orderType;
     this.limit = limit;
   }
 
@@ -125,7 +127,6 @@ class Buyer {
     }
 
     return await this._makeOrder({
-      ordType: 'limit',
       price,
       volume,
     });
@@ -137,13 +138,13 @@ class Buyer {
     });
     return candles?.rows ?? null;
   }
-  async _makeOrder({ ordType = 'limit', price, volume }) {
+  async _makeOrder({ price, volume }) {
     const response = await postOrder({
       market: this.market,
       side: 'bid',
-      ordType,
-      price: ordType === 'price' ? price * volume : price,
-      volume: ordType === 'price' ? undefined : volume,
+      ordType: this.orderType,
+      price: this.orderType === 'price' ? price * volume : price,
+      volume: this.orderType === 'price' ? undefined : volume,
     });
     return response?.data;
   }

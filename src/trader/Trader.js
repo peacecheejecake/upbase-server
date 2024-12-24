@@ -22,6 +22,8 @@ class Trader {
     thresholdBuy = -0.005,
     thresholdSellWin = 0.005,
     thresholdSellLose = -0.02,
+    orderTypeBuy = 'limit',
+    orderTypeSell = 'limit',
     proportion = 1.0,
     intervalBuy = 60,
     intervalSell = 60,
@@ -34,6 +36,7 @@ class Trader {
       windowSize,
       threshold: thresholdBuy,
       interval: intervalBuy,
+      orderType: orderTypeBuy,
       currentPrice: this.getCurrentPrice.bind(this),
       balance: this.getBalanceKRW.bind(this),
       // loader: {
@@ -46,6 +49,7 @@ class Trader {
       thresholdWin: thresholdSellWin,
       thresholdLose: thresholdSellLose,
       interval: intervalSell,
+      orderType: orderTypeSell,
       currentPrice: this.getCurrentPrice.bind(this),
       balance: this.getBalanceCoin.bind(this),
       // loader: {

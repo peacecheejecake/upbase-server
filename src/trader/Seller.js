@@ -16,6 +16,7 @@ class Seller {
     thresholdWin = 0.005,
     thresholdLose = -0.02,
     interval = 60,
+    orderType = 'limit',
     currentPrice,
     balance,
 
@@ -33,6 +34,7 @@ class Seller {
     this.thresholdWin = thresholdWin;
     this.thresholdLose = thresholdLose;
     this.interval = interval;
+    this.orderType = orderType;
     this.periodLimit = periodLimit;
   }
 
@@ -181,7 +183,6 @@ class Seller {
       return null;
     }
     return this._makeOrder({
-      ordType: 'limit',
       price,
       volume,
     });
@@ -215,12 +216,12 @@ class Seller {
         )
       : null;
   }
-  async _makeOrder({ price, volume, ordType = 'limit' }) {
+  async _makeOrder({ price, volume }) {
     const response = await postOrder({
       market: this.market,
       side: 'ask',
-      ordType,
-      price: ordType === 'market' ? undefined : price,
+      ordType: this.orderType,
+      price: this.orderType === 'market' ? undefined : price,
       volume,
     });
     return response?.data ?? null;
