@@ -33,26 +33,18 @@ class MyOrderSocket extends Socket {
             avg_price,
           } = order;
           const _volume = (() => {
-            if (order_type === 'price') {
-              return (
-                (Number(executed_funds) + Number(paid_fee)) / Number(avg_price)
-              );
-            }
+            if (order_type === 'limit') return Number(executed_volume);
 
-            return Number(executed_volume);
+            return (
+              (Number(executed_funds) + Number(paid_fee)) / Number(avg_price)
+            );
           })();
           const _price = (() => {
-            if (order_type === 'price') {
-              return Number(price) / _volume;
-            }
+            if (order_type === 'limit') return Number(avg_price);
 
-            if (order_type === 'market') {
-              return (
-                Number(avg_price) + Number(paid_fee) / Number(executed_volume)
-              );
-            }
-
-            return Number(avg_price);
+            return ask_bid === 'ASK'
+              ? Number(avg_price) + Number(paid_fee) / Number(executed_volume)
+              : Number(price) / _volume;
           })();
 
           // logger.verbose(`[MyOrderSocket] ${JSON.stringify(order)}`);
