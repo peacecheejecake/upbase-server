@@ -223,7 +223,7 @@ class Seller {
       market: this.market,
       side: 'ask',
       ordType: this.orderType,
-      price: this.orderType === 'market' ? undefined : price,
+      price: this.orderType === 'limit' ? price : undefined,
       volume,
     });
     return response?.data ?? null;

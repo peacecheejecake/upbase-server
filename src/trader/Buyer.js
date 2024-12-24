@@ -144,8 +144,8 @@ class Buyer {
       market: this.market,
       side: 'bid',
       ordType: this.orderType,
-      price: this.orderType === 'price' ? price * volume : price,
-      volume: this.orderType === 'price' ? undefined : volume,
+      price: this.orderType === 'limit' ? price : price * volume,
+      volume: this.orderType === 'limit' ? volume : undefined,
       timeInForce: this.timeInForce,
     });
     return response?.data;
