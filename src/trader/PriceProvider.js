@@ -121,7 +121,7 @@ class PriceProvider {
   async initialize({ onChange }) {
     this.#socket.setMessageHandler((data) => {
       this.storePrice(data);
-      this.#onChange?.({ data, snapshot: this.snapshot });
+      this.#onChange?.({ data, snapshot: this.snapshotCompared });
     });
 
     await this.collectPricesForFirstStride();
