@@ -47,7 +47,7 @@ class MyOrderSocket extends Socket {
               : Number(price) / _volume;
           })();
 
-          // logger.verbose(`[MyOrderSocket] ${JSON.stringify(order)}`);
+          logger.verbose(`[MyOrderSocket] ${JSON.stringify(order)}`);
 
           if (_volume > 0 && (state === 'done' || state === 'cancel')) {
             // if (ask_bid === 'BID') {
