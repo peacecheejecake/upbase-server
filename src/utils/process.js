@@ -3,10 +3,12 @@ const RESERVED = {
   't-sell-win': 'thresholdSellWin',
   't-sell-lose': 'thresholdSellLose',
   market: 'market',
-  interval: 'interval',
+  'interval-buy': 'intervalBuy',
+  'interval-sell': 'intervalSell',
   'order-type-buy': 'orderTypeBuy',
   'order-type-sell': 'orderTypeSell',
   'time-in-force': 'timeInForce',
+  'window-size': 'windowSize',
 };
 
 export const processArguments = (args, keys) => {

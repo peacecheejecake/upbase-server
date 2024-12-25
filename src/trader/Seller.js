@@ -5,6 +5,7 @@ import { postOrder, getAccounts } from '../api/index.js';
 class Seller {
   #timer;
   #getCurrentPrice = null;
+  // #getPriceSnapshot = null;
   #getBalance = null;
   // #loader;
   // #buyer;
@@ -18,6 +19,7 @@ class Seller {
     interval = 60,
     orderType = 'limit',
     currentPrice,
+    // priceSnapshot,
     balance,
     timeInForce,
 
@@ -27,6 +29,7 @@ class Seller {
     this.market = market;
 
     this.#getCurrentPrice = currentPrice;
+    // this.#getPriceSnapshot = priceSnapshot;
     this.#getBalance = balance;
 
     // this.#loader = loader;
@@ -51,6 +54,7 @@ class Seller {
   }
   get currentPrice() {
     return this.#getCurrentPrice();
+    // return this.#getPriceSnapshot()?.current;
   }
   get balance() {
     return this.#getBalance();
@@ -77,6 +81,7 @@ class Seller {
       // if (!isOut) {
       logger.debug(`[Seller] CANCEL:`, {
         // rates: JSON.stringify(rates),
+        currentPrice: this.currentPrice,
         holdingOrders: holdingOrders?.length,
         sellingList: sellingList?.length,
         // sellingPrice,

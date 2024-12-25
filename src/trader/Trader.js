@@ -1,20 +1,24 @@
 import { getAccounts } from '../api/index.js';
 import logger from '../utils/logger.js';
+import { deboucnce } from '../utils/debounce.js';
 import Buyer from './Buyer.js';
 import Seller from './Seller.js';
-import CandleFetcher from './CandleFetcher.js';
+// import CandleFetcher from './CandleFetcher.js';
 
-import TickerSocket from '../socket/TickerSocket.js';
+import PriceProvider from './PriceProvider.js';
+
+// import TickerSocket from '../socket/TickerSocket.js';
 import MyAssetSocket from '../socket/MyAssetSocket.js';
 import MyOrderSocket from '../socket/MyOrderSocket.js';
 
 class Trader {
   #sockets = {
-    ticker: null,
+    // ticker: null,
     myAsset: null,
     myOrder: null,
   };
-  #candleFetcher;
+  // #candleFetcher;
+  #priceProvider;
 
   constructor({
     market,
@@ -38,7 +42,9 @@ class Trader {
       threshold: thresholdBuy,
       interval: intervalBuy,
       orderType: orderTypeBuy,
-      currentPrice: this.getCurrentPrice.bind(this),
+      // currentPrice: this.getCurrentPrice.bind(this),
+      currentPrice: () => this.#priceProvider.currentPrice,
+      priceReferences: () => this.#priceProvider.snapshotCompared,
       balance: this.getBalanceKRW.bind(this),
       timeInForce,
       // loader: {
@@ -52,50 +58,60 @@ class Trader {
       thresholdLose: thresholdSellLose,
       interval: intervalSell,
       orderType: orderTypeSell,
-      currentPrice: this.getCurrentPrice.bind(this),
+      // currentPrice: this.getCurrentPrice.bind(this),
+      currentPrice: () => this.#priceProvider.currentPrice,
       balance: this.getBalanceCoin.bind(this),
       timeInForce,
       // loader: {
       //   currentPrice: this.getCurrentPrice.bind(this),
       // },
     });
-    this.#candleFetcher = new CandleFetcher({ market: this.market });
+    // this.#candleFetcher = new CandleFetcher({ market: this.market });
+    this.#priceProvider = new PriceProvider({
+      stride: windowSize,
+      market: this.market,
+      interval: intervalBuy,
+    });
   }
+
   async start({ immediate = false } = {}) {
     await this.startSockets();
+    await this.#priceProvider.initialize({
+      onChange: deboucnce(this.buyer.once.bind(this.buyer), 200),
+    });
 
-    if (immediate) await this.once();
+    if (immediate) await this.buyer.once();
 
-    setInterval(() => {
-      this.fetchCandle();
-      this.once();
-    }, this.buyer.interval * 1000);
+    // setInterval(() => {
+    // this.fetchCandle();
+    // this.once();
+    // }, this.buyer.interval * 1000);
 
     // this.buyer.start({ immediate });
-    // this.seller.start({ immediate });
+    this.seller.start({ immediate });
   }
-  async once() {
-    await this.buyer?.once?.();
-    await this.seller?.once?.();
-  }
-  async fetchCandle() {
-    try {
-      const data = await this.#candleFetcher.fetch({
-        count: this.buyer.interval * 2,
-      });
-      await this.#candleFetcher.toDatabase(data);
-    } catch (error) {
-      logger.error('CandleFetcher error', error);
-    }
-  }
+  // async once() {
+  //   await this.buyer?.once?.();
+  //   await this.seller?.once?.();
+  // }
+  // async fetchCandle() {
+  //   try {
+  //     const data = await this.#candleFetcher.fetch({
+  //       count: this.buyer.interval * 2,
+  //     });
+  //     await this.#candleFetcher.toDatabase(data);
+  //   } catch (error) {
+  //     logger.error('CandleFetcher error', error);
+  //   }
+  // }
   async initializeSockets() {
     const initialAssets = (await getAccounts())?.data ?? [];
 
     this.#sockets = {
-      ticker: new TickerSocket({
-        markets: [this.market],
-        lazyInit: true,
-      }),
+      // ticker: new TickerSocket({
+      //   markets: [this.market],
+      //   lazyInit: true,
+      // }),
       myAsset: new MyAssetSocket({
         lazyInit: true,
         initialAssets,
@@ -112,7 +128,9 @@ class Trader {
     });
   }
   getCurrentPrice() {
-    return this.#sockets.ticker.currentPrice(this.market);
+    return () => this.#priceProvider.currentPrice;
+    //todo
+    // return this.#sockets.ticker.currentPrice(this.market);
     // const response = await getCandles({
     //   unit: 'seconds',
     //   market: this.market,

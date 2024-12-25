@@ -56,7 +56,9 @@ class Socket {
         }
       : {};
   }
-  start() {
+  start({ onMessage = null } = {}) {
+    onMessage && (this.#onMessage = onMessage);
+
     this.#ws = new WebSocket(this.baseUrl, this.socketOptions);
 
     this.#ws.on('open', () => {

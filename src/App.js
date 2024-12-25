@@ -3,7 +3,7 @@ import CandleFetcher from './trader/CandleFetcher.js';
 
 class App {
   #trader;
-  #candleFetcher;
+  // #candleFetcher;
 
   async init({
     market,
@@ -15,9 +15,10 @@ class App {
     thresholdSellWin = 0.005,
     thresholdSellLose = -0.02,
     timeInForce = undefined,
+    windowSize = 60,
   }) {
-    this.#candleFetcher = new CandleFetcher({ market });
-    this.#candleFetcher.batch({ count: 100 });
+    // this.#candleFetcher = new CandleFetcher({ market });
+    // this.#candleFetcher.batch({ count: 100 });
 
     this.#trader = new Trader({
       market,
@@ -29,11 +30,14 @@ class App {
       orderTypeBuy,
       orderTypeSell,
       timeInForce,
+      windowSize,
     });
 
-    setTimeout(() => {
-      this.#trader.start({ immediate: true });
-    }, 3000);
+    this.#trader.start({ immediate: true });
+
+    // setTimeout(() => {
+    //   this.#trader.start({ immediate: true });
+    // }, 3000);
   }
 }
 

@@ -3,12 +3,35 @@ import logger from '../utils/logger.js';
 import { COMMISION_RATE } from './constants.js';
 import { getRecentSecondCandles } from '../db/candle.js';
 
+function debounceWithBestPrice(func, delay) {
+  let timer = null;
+  let bestPriceParams = { price: Infinity, volume: null };
+
+  return async function (params) {
+    const price = Number(params.price);
+    if (price < bestPriceParams.price) {
+      bestPriceParams = params;
+    }
+
+    if (timer) {
+      clearTimeout(timer);
+      timer = null;
+    }
+
+    timer = setTimeout(() => {
+      func(bestPriceParams);
+    }, delay);
+  };
+}
+
 class Buyer {
   #timer;
   // #loader;
   #isWaitingResume = false;
 
   #getCurrentPrice = null;
+  #getPriceReferences = null;
+  // #getPriceSnapshot = null;
   #getBalance = null;
 
   constructor({
@@ -21,6 +44,7 @@ class Buyer {
     timeInForce = undefined,
 
     currentPrice,
+    priceReferences,
     balance,
 
     //todo
@@ -30,6 +54,8 @@ class Buyer {
 
     // this.#loader = loader;
     this.#getCurrentPrice = currentPrice;
+    // this.#getPriceSnapshot = priceSnapshot;
+    this.#getPriceReferences = priceReferences;
     this.#getBalance = balance;
 
     this.windowSize = windowSize;
@@ -51,9 +77,20 @@ class Buyer {
       limit: this.limit,
     };
   }
+  // get priceSnapshot() {
+  //   // return this.#getCurrentPrice();
+  //   return this.#getPriceSnapshot();
+  // }
+  // get priceSnapshot() {
+  //   return this.#getPriceSnapshot();
+  // }
+  get priceReferences() {
+    return this.#getPriceReferences();
+  }
   get currentPrice() {
     return this.#getCurrentPrice();
   }
+
   get balance() {
     return this.#getBalance();
   }
@@ -83,7 +120,7 @@ class Buyer {
   }
   async once() {
     // logger.debug(`[Buyer] START`);
-    const { isIn, buyingPrice, rate } = (await this.consider()) ?? {};
+    const { isIn, buyingPrice, rate } = this.consider() ?? {};
     // const balance = await this.#loader.balance?.();
 
     if (!isIn || !this.balance) {
@@ -91,25 +128,29 @@ class Buyer {
       return;
     }
 
-    const data = await this.buy({
+    debounceWithBestPrice(
+      this.buy.bind(this),
+      100
+    )({
       price: buyingPrice,
       rate,
     });
-    const { uuid } = data ?? {};
-
-    if (uuid) {
-      logger.info(`[Buyer] BUY - price: ${buyingPrice}, rate: ${rate}`);
-    }
   }
-  async consider() {
-    const recentCandles = await this.getRecentCandles();
+  consider() {
+    // const recentCandles = await this.getRecentCandles();
+    const highest = this.priceReferences?.high;
 
-    if (!recentCandles || !this.currentPrice) return null;
+    if (!highest || !this.currentPrice) {
+      logger.debug(
+        `[Buyer] Cancel for not enough information - current: ${this.currentPrice}, high: ${highest}`
+      );
+      return null;
+    }
 
-    const highestOfLows = Math.max(
-      ...recentCandles.map(({ low_price }) => Number(low_price))
-    );
-    const diffRate = (this.currentPrice - highestOfLows) / highestOfLows;
+    // const highestOfLows = Math.max(
+    //   ...recentCandles.map(({ low_price }) => Number(low_price))
+    // );
+    const diffRate = (this.currentPrice - highest) / highest;
 
     return {
       isIn: diffRate <= this.threshold,
@@ -123,14 +164,12 @@ class Buyer {
     const totalPrice = price * volume;
 
     if (totalPrice < 5000) {
-      logger.warn(`[Buyer] 최소주문금액 이하: ${price}, ${rate}`);
+      logger.info(`[Buyer] 최소주문금액 이하: ${price}, ${rate}`);
       return null;
     }
 
-    return await this._makeOrder({
-      price,
-      volume,
-    });
+    const { uuid } = (await this._makeOrder({ price, volume })) ?? {};
+    if (uuid) logger.info(`[Buyer] BUY - price: ${price}, rate: ${rate}`);
   }
   async getRecentCandles() {
     const candles = await getRecentSecondCandles({
