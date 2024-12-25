@@ -4,10 +4,7 @@ import App from './App.js';
 
 const app = new App();
 const args = processArguments();
-
-logger.info(args);
-
-app.init({
+const params = {
   market: args.market ?? 'KRW-IOTA',
   intervalBuy: args.interval ? Number(args['interval-buy']) : 5,
   intervalSell: args.interval ? Number(args['interval-sell']) : 5,
@@ -18,4 +15,8 @@ app.init({
   orderTypeSell: args['order-type-sell'],
   timeInForce: args['time-in-force'],
   windowSize: args['window-size'] ? Number(args['window-size']) : 60,
-});
+};
+
+logger.info(params);
+
+app.init(params);
