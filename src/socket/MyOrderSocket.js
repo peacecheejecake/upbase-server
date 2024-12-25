@@ -49,7 +49,7 @@ class MyOrderSocket extends Socket {
 
           logger.verbose(`[MyOrderSocket] ${JSON.stringify(order)}`);
 
-          if (_volume > 0 && (state === 'done' || state === 'cancel')) {
+          if (state === 'done' || state === 'cancel') {
             // if (ask_bid === 'BID') {
             // logger.debug(`[MyOrderSocket] addOrder - ${uuid}`);
             // } else if (ask_bid === 'ASK') {
