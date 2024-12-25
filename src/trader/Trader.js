@@ -77,10 +77,10 @@ class Trader {
   async start({ immediate = false } = {}) {
     await this.startSockets();
     await this.#priceProvider.initialize({
-      onChange: deboucnce(this.buyer.once.bind(this.buyer), 200),
+      onChange: deboucnce(this.once.bind(this), 150),
     });
 
-    if (immediate) await this.buyer.once();
+    if (immediate) await this.once();
 
     // setInterval(() => {
     // this.fetchCandle();
@@ -88,12 +88,12 @@ class Trader {
     // }, this.buyer.interval * 1000);
 
     // this.buyer.start({ immediate });
-    this.seller.start({ immediate });
+    // this.seller.start({ immediate });
   }
-  // async once() {
-  //   await this.buyer?.once?.();
-  //   await this.seller?.once?.();
-  // }
+  async once() {
+    await this.buyer?.once?.();
+    await this.seller?.once?.();
+  }
   // async fetchCandle() {
   //   try {
   //     const data = await this.#candleFetcher.fetch({
