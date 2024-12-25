@@ -225,6 +225,7 @@ class Seller {
       ordType: this.orderType,
       price: this.orderType === 'limit' ? price : undefined,
       volume,
+      timeInForce: this.timeInForce,
     });
     return response?.data ?? null;
   }
