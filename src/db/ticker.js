@@ -29,7 +29,7 @@ export const addTicker = (data) => {
   });
 
   return client.query(
-    `INSERT INTO orders_buy (${names}) VALUES (${blanks})`,
+    `INSERT INTO tickers (${names}) VALUES (${blanks})`,
     values
   );
 };
