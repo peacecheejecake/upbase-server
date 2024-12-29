@@ -1,5 +1,6 @@
 import client from './client.js';
 import logger from '../utils/logger.js';
+import { format } from './_utils.js';
 
 export const getOrders = (query = {}) => {
   // const select = 'SELECT * FROM orders_buy';
@@ -64,14 +65,15 @@ export const addOrder = (data) => {
     unit_price
   } 
   */
-  const keys = Object.keys(data);
-  const columnNames = keys.join(', ');
-  const columnBlanks = keys.map((_, i) => `$${i + 1}`).join(', ');
+  // const keys = Object.keys(data);
+  // const columnNames = keys.join(', ');
+  // const columnBlanks = keys.map((_, i) => `$${i + 1}`).join(', ');
 
-  const values = Object.values(data);
+  // const values = Object.values(data);
+  const { names, blanks, values } = format(data);
 
   return client.query(
-    `INSERT INTO orders_buy (${columnNames}) VALUES (${columnBlanks})`,
+    `INSERT INTO orders_buy (${names}) VALUES (${blanks})`,
     values
   );
 };
