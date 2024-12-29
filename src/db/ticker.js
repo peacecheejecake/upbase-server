@@ -22,6 +22,8 @@ export const addTicker = (data) => {
   // trade_time char(8),
   // trade_timestamp int
 
+  console.log(JSON.stringify(data));
+
   const { names, blanks, values } = format({
     ...data,
     market: data.code,
