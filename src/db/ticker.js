@@ -33,3 +33,10 @@ export const addTicker = (data) => {
     values
   );
 };
+
+export const getTickers = ({ market, count = 1e10 }) => {
+  return client.query(
+    'SELECT * FROM tickers WHERE market = $1 ORDER BT timestamp DESC LIMIT $2',
+    [market, count]
+  );
+};
