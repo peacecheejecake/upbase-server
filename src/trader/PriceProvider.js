@@ -148,9 +148,7 @@ class PriceProvider {
   }
 
   collectPricesForFirstStride() {
-    logger.info(
-      `Start collecting first prices of ${this.market} for ${this.#stride} seconds.`
-    );
+    logger.info(`Start collecting first ${this.#stride} items.`);
 
     this.#isCollectingFirstStride = true;
 
