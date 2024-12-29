@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import TickerSocket from '../socket/TickerSocket.js';
 import logger from '../utils/logger.js';
-import { addTicker } from '@/db/ticker.js';
+import { addTicker } from '../db/ticker.js';
 
 class PriceProvider {
   #stride;
