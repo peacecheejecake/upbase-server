@@ -15,6 +15,7 @@ const params = {
   orderTypeSell: args['order-type-sell'],
   timeInForce: args['time-in-force'],
   windowSize: args['window-size'] ? Number(args['window-size']) : 60,
+  collectOnly: args['collect-only'] === 'true',
 };
 
 logger.info(params);

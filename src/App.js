@@ -16,6 +16,7 @@ class App {
     thresholdSellLose = -0.02,
     timeInForce = undefined,
     windowSize = 60,
+    collectOnly = false,
   }) {
     // this.#candleFetcher = new CandleFetcher({ market });
     // this.#candleFetcher.batch({ count: 100 });

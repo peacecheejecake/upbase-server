@@ -9,6 +9,7 @@ const RESERVED = {
   'order-type-sell': 'orderTypeSell',
   'time-in-force': 'timeInForce',
   'window-size': 'windowSize',
+  'collect-only': 'collectOnly',
 };
 
 export const processArguments = (args, keys) => {

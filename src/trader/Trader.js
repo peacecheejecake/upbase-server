@@ -19,6 +19,7 @@ class Trader {
   };
   // #candleFetcher;
   #priceProvider;
+  #collectOnly = false;
 
   constructor({
     market,
@@ -32,6 +33,7 @@ class Trader {
     intervalBuy = 60,
     intervalSell = 60,
     timeInForce = undefined,
+    collectOnly = false,
   }) {
     this.market = market;
 
@@ -72,10 +74,14 @@ class Trader {
       market: this.market,
       interval: intervalBuy,
     });
+    this.#collectOnly = collectOnly;
   }
 
   async start({ immediate = false } = {}) {
     await this.startSockets();
+
+    if (this.#collectOnly) return;
+
     await this.#priceProvider.initialize({
       onChange: deboucnce(this.once.bind(this), 150),
     });
