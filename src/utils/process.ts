@@ -1,3 +1,5 @@
+interface
+
 const RESERVED = {
   't-buy': 'thresholdBuy',
   't-sell-win': 'thresholdSellWin',
@@ -11,7 +13,7 @@ const RESERVED = {
   'window-size': 'windowSize',
 };
 
-export const processArguments = (args, keys) => {
+export const processArguments = (args?: string[], keys?: string[]) => {
   const raw = args || process.argv.slice(2);
 
   const reservedKeys = keys || Object.keys(RESERVED);
@@ -27,10 +29,10 @@ export const processArguments = (args, keys) => {
   );
 };
 
-export const translateKey = (key) => {
+export const translateKey = (key: string) => {
   return RESERVED[key];
 };
 
-export const isReserved = (key) => {
+export const isReserved = (key: string) => {
   return RESERVED[key] !== undefined;
 };

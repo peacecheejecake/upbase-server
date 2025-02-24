@@ -1,8 +1,21 @@
-import Trader from './trader/Trader.js';
-import CandleFetcher from './trader/CandleFetcher.js';
+import Trader from './trader/Trader';
+// import CandleFetcher from './trader/CandleFetcher.js';
+
+interface InitOptions {
+	market: string;
+	intervalBuy?: number;
+	intervalSell?: number;
+	orderTypeBuy?: string;
+	orderTypeSell?: string;
+	thresholdBuy?: number;
+	thresholdSellWin?: number;
+	thresholdSellLose?: number;
+	timeInForce?: string;
+	windowSize?: number;
+}
 
 class App {
-  #trader;
+  private trader: Trader;
   // #candleFetcher;
 
   async init({
@@ -16,11 +29,11 @@ class App {
     thresholdSellLose = -0.02,
     timeInForce = undefined,
     windowSize = 60,
-  }) {
+  }: InitOptions) {
     // this.#candleFetcher = new CandleFetcher({ market });
     // this.#candleFetcher.batch({ count: 100 });
 
-    this.#trader = new Trader({
+    this.trader = new Trader({
       market,
       intervalBuy,
       intervalSell,
@@ -33,7 +46,7 @@ class App {
       windowSize,
     });
 
-    this.#trader.start({ immediate: true });
+    this.trader.start({ immediate: true });
 
     // setTimeout(() => {
     //   this.#trader.start({ immediate: true });

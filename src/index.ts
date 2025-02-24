@@ -1,6 +1,6 @@
-import { processArguments } from './utils/process.js';
-import logger from './utils/logger.js';
-import App from './App.js';
+import { processArguments } from './utils/process';
+import logger from './utils/logger';
+import App from './App';
 
 const app = new App();
 const args = processArguments();

@@ -1,6 +1,17 @@
-import request from '../request.js';
+import request from '@/request';
+import type {
+  GETWithdrawsChange,
+  GETWithdraw,
+  GETWithdraws,
+  POSTWithdrawsCoin,
+  POSTWithdrawsKrw,
+  GETCoinAddressesWithdrawsAvailable,
+} from './types.ts';
 
-export const getWithdrawsChance = ({ currency, netType }) => {
+export const getWithdrawsChance: GETWithdrawsChange = ({
+  currency,
+  netType,
+}) => {
   return request.get('/v1/withdraws/chance', {
     params: {
       currency,
@@ -10,7 +21,7 @@ export const getWithdrawsChance = ({ currency, netType }) => {
 };
 
 // 출금 UUID를 통해 개별 출금 정보를 조회한다.
-export const getWidthdraw = ({ uuid, txid, currency }) => {
+export const getWidthdraw: GETWithdraw = ({ uuid, txid, currency }) => {
   return request.get('/v1/withdraw', {
     params: {
       uuid,
@@ -20,7 +31,7 @@ export const getWidthdraw = ({ uuid, txid, currency }) => {
   });
 };
 
-export const getWidthdraws = ({
+export const getWidthdraws: GETWithdraws = ({
   currency,
   state,
   uuids,
@@ -42,7 +53,7 @@ export const getWidthdraws = ({
   });
 };
 
-export const postWithdrawCoin = ({
+export const postWithdrawsCoin: POSTWithdrawsCoin = ({
   currency,
   network,
   amount,
@@ -61,3 +72,18 @@ export const postWithdrawCoin = ({
     },
   });
 };
+
+export const postWithdrawsKrw: POSTWithdrawsKrw = ({
+  amount,
+  twoFactorType,
+}) => {
+  return request.post('/v1/withdraws/krw', {
+    amount,
+    two_factor_type: twoFactorType,
+  });
+};
+
+export const getCoinAddressesWithdrawsAvailable: GETCoinAddressesWithdrawsAvailable =
+  () => {
+    return request.get('/v1/withdraws/coin_addresses');
+  };

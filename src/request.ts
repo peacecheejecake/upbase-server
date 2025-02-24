@@ -1,14 +1,26 @@
-import axios from 'axios';
+import axios, { type AxiosResponse } from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 import jsonwebtoken from 'jsonwebtoken';
-import crypto from 'crypto';
-import querystring from 'querystring';
+import * as crypto from 'crypto';
+import * as querystring from 'querystring';
 
-import env from './env.js';
-import { filterEmptyValues, flatternArrayValues } from './utils/index.js';
+import env from './env';
+import { filterEmptyValues, flatternArrayValues } from './utils';
 import logger from './utils/logger.js';
 
-const jwtToken = (body = {}) => {
+interface Body {
+  [key: string]:
+    | string
+    | number
+    | boolean
+    | readonly string[]
+    | readonly number[]
+    | readonly boolean[]
+    | null
+    | undefined;
+}
+
+const jwtToken = (body: Body = {}) => {
   const _isArray = ([key, _]) => key.includes('[]');
 
   const arrayQuery = Object.entries(body)
@@ -78,3 +90,8 @@ _axios.interceptors.response.use(
 // };
 
 export default _axios;
+
+export type Response<T> = AxiosResponse<T>;
+export type Fetcher<Q extends object, S extends object> = (
+  params?: Q
+) => Promise<Response<S>>;

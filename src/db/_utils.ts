@@ -1,4 +1,4 @@
-export const format = (data) => {
+export const format = <T extends object>(data: T) => {
   const _data = Object.fromEntries(
     Object.entries(data).filter(([_, value]) => value !== undefined)
   );
@@ -9,5 +9,13 @@ export const format = (data) => {
   const columnNames = keys.join(', ');
   const columnBlanks = keys.map((_, i) => `$${i + 1}`).join(', ');
 
-  return { names: columnNames, blanks: columnBlanks, values };
+  return {
+    names: columnNames,
+    blanks: columnBlanks,
+    values,
+  } as {
+    names: string;
+    blanks: string;
+    values: T[keyof T][];
+  };
 };

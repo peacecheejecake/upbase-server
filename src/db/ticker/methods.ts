@@ -1,6 +1,6 @@
-import client from './client.js';
+import client from '../client.js';
 // import logger from '../utils/logger.js';
-import { format } from './_utils.js';
+import { format } from '../_utils.js';
 
 export const addTicker = (data) => {
   // opening_price float,

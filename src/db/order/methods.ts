@@ -1,6 +1,6 @@
-import client from './client.js';
-import logger from '../utils/logger.js';
-import { format } from './_utils.js';
+import logger from '@/utils/logger.js';
+import client from '../client.js';
+import { format } from '../_utils.js';
 
 export const getOrders = (query = {}) => {
   // const select = 'SELECT * FROM orders_buy';

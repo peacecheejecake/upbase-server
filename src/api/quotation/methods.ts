@@ -1,6 +1,17 @@
-import request from '../request.js';
+import request from '@/request';
+import {
+  GETAvailableMarkets,
+  GETCandles,
+  GETRecentTrades,
+  GETCurrentPrices,
+  GETCurrentPricesForCurrencies,
+  GETOrderbook,
+  GETSupportedLevelsOfOrderbook,
+} from './types';
 
-export const getAvailableMarkets = ({ isDetails = false }) => {
+export const getAvailableMarkets: GETAvailableMarkets = ({
+  isDetails = false,
+}) => {
   return request.get('/v1/market/all', {
     params: {
       is_details: isDetails,
@@ -8,7 +19,12 @@ export const getAvailableMarkets = ({ isDetails = false }) => {
   });
 };
 
-export const getCandles = ({ unit = 'minutes', market, to, count }) => {
+export const getCandles: GETCandles = ({
+  unit = 'minutes',
+  market,
+  to,
+  count,
+}) => {
   const pathParam = (() => {
     if (['seconds', 'days', 'weeks', 'months', 'years'].includes(unit)) {
       return unit;
@@ -37,7 +53,13 @@ export const getCandles = ({ unit = 'minutes', market, to, count }) => {
   });
 };
 
-export const getRecentTrades = ({ market, to, count, cursor, daysAgo }) => {
+export const getRecentTrades: GETRecentTrades = ({
+  market,
+  to,
+  count,
+  cursor,
+  daysAgo,
+}) => {
   return request.get('/v1/trades/ticks', {
     params: {
       market,
@@ -49,7 +71,7 @@ export const getRecentTrades = ({ market, to, count, cursor, daysAgo }) => {
   });
 };
 
-export const getCurrentPrices = ({ markets }) => {
+export const getCurrentPrices: GETCurrentPrices = ({ markets }) => {
   return request.get('/v1/ticker', {
     params: {
       markets: Array.isArray(markets) ? markets.join(',') : markets,
@@ -57,7 +79,9 @@ export const getCurrentPrices = ({ markets }) => {
   });
 };
 
-export const getCurrentPricesForCurrencies = ({ currencies }) => {
+export const getCurrentPricesForCurrencies: GETCurrentPricesForCurrencies = ({
+  currencies,
+}) => {
   return request.get('/v1/ticker/all', {
     params: {
       quote_currencies: currencies.join(','),
@@ -65,15 +89,16 @@ export const getCurrentPricesForCurrencies = ({ currencies }) => {
   });
 };
 
-export const getOrderbook = ({ markets, level }) => {
+export const getOrderbook: GETOrderbook = ({ markets, level }) => {
   return request.get('/v1/orderbook', {
     params: {
       market: Array.isArray(markets) ? markets.join(',') : markets,
-      count,
+      level,
     },
   });
 };
 
-export const getSupportedLevelsOfOrderbook = () => {
-  return request.get('/v1/orderbook/supported_levels');
-};
+export const getSupportedLevelsOfOrderbook: GETSupportedLevelsOfOrderbook =
+  () => {
+    return request.get('/v1/orderbook/supported_levels');
+  };

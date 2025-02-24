@@ -1,5 +1,5 @@
-import Socket from './base/Socket.js';
-import logger from '../utils/logger.js';
+import Socket from './base/Socket';
+import logger from '../utils/logger';
 
 class MyAssetSocket extends Socket {
   #assets;

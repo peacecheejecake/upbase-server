@@ -1,8 +1,8 @@
 import WebSocket, { WebSocketServer } from 'ws';
 import { v4 as uuidv4 } from 'uuid';
 import jwt from 'jsonwebtoken';
-import env from '../../env.js';
-import logger from '../../utils/logger.js';
+import env from '@/env.js';
+import logger from '@/utils/logger.js';
 
 function jwtToken() {
   const payload = {
@@ -14,12 +14,12 @@ function jwtToken() {
 }
 
 class Socket {
-  #ws;
-  #requestData;
-  #pingTimer;
-  #isPrivate = false;
+  #ws: WebSocket;
+  #requestData: object;
+  #pingTimer: NodeJS.Timeout;
+  #isPrivate: boolean = false;
 
-  #onError;
+  #onError?: (error) => void;
   #onMessage;
   #onUpgrade;
 

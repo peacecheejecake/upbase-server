@@ -1,14 +1,21 @@
 import dayjs from 'dayjs';
-import { formatDatetime } from '../utils/index.js';
-import { getCandles } from '../api/quotation.js';
-import { addSecondCandle, getSecondCandle } from '../db/candle.js';
+import { formatDatetime } from '../utils/index';
+import { getCandles } from '../api/quotation';
+import { addSecondCandle, getSecondCandle } from '../db/candle';
+
+interface FetchFuncOptions {
+  to: string;
+  count: number;
+}
 
 class CandleFetcher {
+  market: string;
+
   constructor({ market }) {
     // this.unit = unit;
     this.market = market;
   }
-  async fetch({ to = '', count }) {
+  async fetch({ to = '', count }: FetchFuncOptions) {
     for (let i = 0; i < Math.ceil(count / 200); i++) {}
     const response = await getCandles({
       // unit: this.unit,
