@@ -1,12 +1,47 @@
 import dayjs from 'dayjs';
-import Socket from './base/Socket.js';
-import logger from '../utils/logger.js';
-import { addOrder } from '../db/order.js';
+import Socket from './base/Socket';
+import logger from '../utils/logger';
+import { addOrder } from '../db/order';
+
+interface MyOrderDataFullHand {
+  type: 'myOrder';
+  code: string;
+  uuid: string;
+  ask_bid: 'ASK' | 'BID';
+  order_type: 'limit' | 'price' | 'market' | 'best';
+  state: 'wait' | 'watch' | 'trade' | 'done' | 'cancel';
+  trade_uuid: string;
+  price: number;
+  avg_price: number;
+  volume: number;
+  remaining_volume: number;
+  executed_volume: number;
+  trades_count: number;
+  reserved_fee: number;
+  remaining_fee: number;
+  paid_fee: number;
+  locked: number;
+  executed_funds: number;
+  time_in_force: 'ioc' | 'fok';
+  trade_fee: number;
+  is_maker: boolean;
+  identifier: string;
+  trade_timestamp: number;
+  order_timestamp: number;
+  timestamp: number;
+  stream_type: string;
+}
+
+type MyOrderData = MyOrderDataFullHand;
+
+interface MyOrderSocketConstructorOptions {
+  lazyInit?: boolean;
+}
 
 class MyOrderSocket extends Socket {
   // #orders = [];
 
-  constructor({ lazyInit = false } = {}) {
+  constructor({ lazyInit = false }: MyOrderSocketConstructorOptions) {
     super({
       requestData: [
         { ticket: 'my-order' },
@@ -17,7 +52,7 @@ class MyOrderSocket extends Socket {
       isPrivate: true,
       onMessage: (data) => {
         try {
-          const order = JSON.parse(data.toString());
+          const order = JSON.parse(data.toString()) as MyOrderData;
           if (!order?.uuid) return;
           // this.#orders = orders;
 
@@ -32,6 +67,7 @@ class MyOrderSocket extends Socket {
             price,
             avg_price,
           } = order;
+
           const _volume = (() => {
             if (order_type === 'limit') return Number(executed_volume);
 
@@ -73,7 +109,7 @@ class MyOrderSocket extends Socket {
       },
     });
   }
-  addOrderToDatabase(order) {
+  addOrderToDatabase(order: MyOrderData) {
     const {
       type,
       code,
@@ -95,12 +131,12 @@ class MyOrderSocket extends Socket {
       executed_funds,
       time_in_force,
       trade_fee,
-      is_marker,
+      is_maker,
       identifier,
       trade_timestamp,
       order_timestamp,
       timestamp,
-      unit_price,
+      // unit_price,
     } = order;
     // const _price = avg_price;
 
@@ -125,7 +161,7 @@ class MyOrderSocket extends Socket {
       time_in_force,
       identifier,
       holding: ask_bid === 'BID',
-      unit_price,
+      unit_price: price,
     });
   }
   // clearOrders() {
