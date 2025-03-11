@@ -1,5 +1,3 @@
-interface
-
 const RESERVED = {
   't-buy': 'thresholdBuy',
   't-sell-win': 'thresholdSellWin',
