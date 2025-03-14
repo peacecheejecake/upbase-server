@@ -1,4 +1,17 @@
-const RESERVED = {
+interface ReservedOptions {
+  't-buy': string;
+  't-sell-win': string;
+  't-sell-lose': string;
+  market: string;
+  'interval-buy': string;
+  'interval-sell': string;
+  'order-type-buy': string;
+  'order-type-sell': string;
+  'time-in-force': string;
+  'window-size': string;
+}
+
+const RESERVED: ReservedOptions = {
   't-buy': 'thresholdBuy',
   't-sell-win': 'thresholdSellWin',
   't-sell-lose': 'thresholdSellLose',

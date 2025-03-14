@@ -1,7 +1,7 @@
-import { postOrder } from '../api/index.js';
-import logger from '../utils/logger.js';
-import { COMMISION_RATE } from './constants.js';
-import { getRecentSecondCandles } from '../db/candle.js';
+import { postOrder } from '../api';
+import logger from '../utils/logger';
+import { COMMISION_RATE } from './constants';
+import { getRecentSecondCandles } from '../db/candle';
 
 function debounceWithBestPrice(func, delay) {
   let timer = null;
@@ -25,9 +25,9 @@ function debounceWithBestPrice(func, delay) {
 }
 
 class Buyer {
-  #timer;
+  #timer: NodeJS.Timeout;
   // #loader;
-  #isWaitingResume = false;
+  #isWaitingResume: boolean = false;
 
   #getCurrentPrice = null;
   #getPriceReferences = null;

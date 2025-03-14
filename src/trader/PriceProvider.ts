@@ -1,20 +1,37 @@
-import dayjs from 'dayjs';
-import TickerSocket from '../socket/TickerSocket.js';
-import logger from '../utils/logger.js';
-import { addTicker } from '../db/ticker.js';
+import TickerSocket, { type TickerData } from '../socket/TickerSocket';
+import logger from '../utils/logger';
+import { addTicker } from '@/db/ticker';
+
+// import { PriceProviderAbstract } from './abstract/PriceProvider';
+
+export interface StorageItem {
+  trade_price: number;
+  timestamp: number;
+}
+export interface Snapshot {
+  high: number;
+  mid: number;
+  low: number;
+}
+export type PriceChangeHandler = (args: {
+  data: TickerData;
+  snapshot: Snapshot
+}) => void;
 
 class PriceProvider {
-  #stride;
+  #stride: number;
   // #interval;
 
-  #socket;
-  #storage = []; // [timestamp]: { timestamp, trade_price }
+  #socket: TickerSocket;
+  #storage: StorageItem[] = []; // [timestamp]: { timestamp, trade_price }
   // #onChange = null;
 
-  #isCollectingFirstStride = false;
+  #isCollectingFirstStride: boolean = false;
 
   // #timerStride = null;
-  #timerGarbageCollection = null;
+  #timerGarbageCollection: NodeJS.Timeout = null;
+
+  market: string;
 
   constructor({ stride, market, interval }) {
     this.#stride = stride;
@@ -91,7 +108,7 @@ class PriceProvider {
   //   return (this.highPrice + this.lowPrice) / 2;
   // }
 
-  get snapshotCompared() {
+  get snapshotCompared(): Snapshot {
     if (!this.#pricesCompared.length) return null;
 
     const high = Math.max(...this.#pricesCompared);
@@ -116,7 +133,9 @@ class PriceProvider {
   //   };
   // }
 
-  initialize({ onChange }) {
+  initialize({ onChange }: {
+    onChange?: PriceChangeHandler;
+  }) {
     this.#socket.setMessageHandler((data) => {
       this.storePrice(data);
 
@@ -200,7 +219,7 @@ class PriceProvider {
     this.#timerGarbageCollection = null;
   }
 
-  storePrice(data) {
+  storePrice(data: TickerData) {
     const { timestamp, trade_price } = data;
 
     if (!timestamp) {

@@ -6,7 +6,7 @@ import * as querystring from 'querystring';
 
 import env from './env';
 import { filterEmptyValues, flatternArrayValues } from './utils';
-import logger from './utils/logger.js';
+import logger from './utils/logger';
 
 interface Body {
   [key: string]:

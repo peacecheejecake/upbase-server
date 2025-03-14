@@ -1,7 +1,7 @@
 import Socket from './base/Socket.js';
 import type { SocketCommon } from './types';
 
-interface TickerData {
+export interface TickerData {
   type: 'ticker';
   code: string;
   opening_price: number;

@@ -1,6 +1,6 @@
-import logger from '../utils/logger.js';
-import { getOrders, modifyOrderHoldingState } from '../db/order.js';
-import { postOrder, getAccounts } from '../api/index.js';
+import logger from '../utils/logger';
+import { getOrders, modifyOrderHoldingState } from '../db/order';
+import { postOrder, getAccounts } from '../api';
 
 class Seller {
   #timer;

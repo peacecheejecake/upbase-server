@@ -1,5 +1,4 @@
 import Trader from './trader/Trader';
-// import CandleFetcher from './trader/CandleFetcher.js';
 
 interface InitOptions {
 	market: string;

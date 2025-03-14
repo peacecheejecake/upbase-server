@@ -1,15 +1,15 @@
-import { getAccounts } from '../api/index.js';
-import logger from '../utils/logger.js';
-import { deboucnce } from '../utils/debounce.js';
-import Buyer from './Buyer.js';
-import Seller from './Seller.js';
+import { getAccounts } from '../api';
+import logger from '../utils/logger';
+import { deboucnce } from '../utils/debounce';
+import Buyer from './Buyer';
+import Seller from './Seller';
 // import CandleFetcher from './CandleFetcher.js';
 
-import PriceProvider from './PriceProvider.js';
+import PriceProvider from './PriceProvider';
 
-// import TickerSocket from '../socket/TickerSocket.js';
-import MyAssetSocket from '../socket/MyAssetSocket.js';
-import MyOrderSocket from '../socket/MyOrderSocket.js';
+// import TickerSocket from '../socket/TickerSocket';
+import MyAssetSocket from '../socket/MyAssetSocket';
+import MyOrderSocket from '../socket/MyOrderSocket';
 
 class Trader {
   #sockets = {
