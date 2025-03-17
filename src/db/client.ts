@@ -22,7 +22,7 @@ class Client {
   end() {
     this.#client.end();
   }
-  query<R>(text: string, value?: string[]): QueryResponse<R> {
+  query<R>(text: string, value?: any[]): QueryResponse<R> {
     return this.#client.query(text, value);
   }
 }

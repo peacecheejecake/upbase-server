@@ -1,6 +1,11 @@
 import client from '../client';
+import type {
+  AddSecondCandle,
+  GetSecondCandle,
+  GETRecentSecondeCandles,
+} from './types';
 
-export const addSecondCandle = (data) => {
+export const addSecondCandle: AddSecondCandle = (data) => {
   /*
     market,
     candle_date_time_utc,
@@ -28,7 +33,10 @@ export const addSecondCandle = (data) => {
   }
 };
 
-export const getSecondCandle = ({ market, candle_date_time_kst }) => {
+export const getSecondCandle: GetSecondCandle = ({
+  market,
+  candle_date_time_kst,
+}) => {
   try {
     return client.query(
       `
@@ -45,7 +53,10 @@ export const getSecondCandle = ({ market, candle_date_time_kst }) => {
   }
 };
 
-export const getRecentSecondCandles = ({ market, count }) => {
+export const getRecentSecondCandles: GETRecentSecondeCandles = ({
+  market,
+  count,
+}) => {
   try {
     return client.query(
       `

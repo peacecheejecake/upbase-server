@@ -1,8 +1,14 @@
 import logger from '@/utils/logger';
 import client from '../client';
 import { format } from '../_utils';
+import type {
+  GetOrders,
+  DeleteOrder,
+  ModifyOrderHoldingState,
+  AddOrder,
+} from './types';
 
-export const getOrders = (query = {}) => {
+export const getOrders: GetOrders = (query = {}) => {
   // const select = 'SELECT * FROM orders_buy';
 
   const conditionEntries = Object.entries(query).filter(
@@ -29,19 +35,22 @@ export const getOrders = (query = {}) => {
   // ]);
 };
 
-export const deleteOrder = ({ uuid }) => {
+export const deleteOrder: DeleteOrder = ({ uuid }) => {
   logger.debug(`[DB - deleteOrder] uuid: ${uuid}`);
   return client.query('DELETE FROM orders_buy WHERE uuid = $1', [uuid]);
 };
 
-export const modifyOrderHoldingState = ({ uuid, holding = false }) => {
+export const modifyOrderHoldingState: ModifyOrderHoldingState = ({
+  uuid,
+  holding = false,
+}) => {
   return client.query('UPDATE orders_buy SET holding = $2 WHERE uuid = $1', [
     uuid,
     holding,
   ]);
 };
 
-export const addOrder = (data) => {
+export const addOrder: AddOrder = (data) => {
   /*
   {
     uuid,
