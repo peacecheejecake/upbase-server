@@ -25,7 +25,7 @@
     "vite": "^6.2.1"
   },
   "scripts": {
-    "start": "node --import=specifier-resolution-node/register src/index.js",
+    "start": "npx vite-node src/index.ts",
     "format": "prettier --write ."
   }
 }
