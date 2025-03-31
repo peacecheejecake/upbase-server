@@ -178,3 +178,6 @@ dist
 
 .history
 .node-version
+
+node_modules
+yarn.lock
