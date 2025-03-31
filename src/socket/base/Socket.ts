@@ -39,10 +39,10 @@ class Socket {
     isPrivate = false,
     lazyInit = false,
     // onOpen = () => {},
-    onError = (ws: WebSocket, error: Error) => {
+    onError = (error: Error) => {
       logger.error(error);
     },
-    onMessage = (ws: WebSocket, data: RawData) => {
+    onMessage = (data: RawData) => {
       logger.debug(data);
     },
     onUpgrade = null,

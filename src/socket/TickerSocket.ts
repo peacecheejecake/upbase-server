@@ -75,7 +75,7 @@ class TickerSocket extends Socket {
   }
 
   setMessageHandler(handler?: (data: TickerData) => void) {
-    this.#onMessage = (ws: WebSocket, data: TickerData) => {
+    this.#onMessage = (data: TickerData) => {
       const _data = JSON.parse(data.toString()) ?? ({} as TickerData);
       const { code, trade_price, stream_type } = _data;
 
