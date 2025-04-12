@@ -177,3 +177,7 @@ dist
 # End of https://www.toptal.com/developers/gitignore/api/node,macos
 
 .history
+.node-version
+
+node_modules
+yarn.lock
